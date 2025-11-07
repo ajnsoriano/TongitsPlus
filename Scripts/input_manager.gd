@@ -8,11 +8,13 @@ const COLLISION_MASK_DECK = 4
 
 var card_manager_reference
 var deck_reference
+var player_hand_reference
 
 func _ready() -> void:
 	card_manager_reference = $"../CardManager"
 	deck_reference = $"../Deck"
-
+	player_hand_reference = $"../PlayerHand"
+	
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
@@ -37,4 +39,4 @@ func raycast_at_cursor():
 				card_manager_reference.start_drag(card_found)
 		elif result_collision_mask == COLLISION_MASK_DECK:
 			# DECK CLICKED
-			deck_reference.draw_card()
+			deck_reference.draw_card(player_hand_reference)

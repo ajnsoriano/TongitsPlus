@@ -1,11 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://c1eugftio4pke"]
+[gd_scene load_steps=10 format=3 uid="uid://c1eugftio4pke"]
 
 [ext_resource type="Script" uid="uid://gkmi1ujywskx" path="res://Scripts/card_manager.gd" id="1_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://bmuc62odcbhup" path="res://Scenes/card_slot.tscn" id="3_8gbba"]
 [ext_resource type="Script" uid="uid://citaeg5nbqygn" path="res://Scripts/player_hand.gd" id="3_jjvhh"]
+[ext_resource type="Script" uid="uid://difacut0320g0" path="res://Scripts/opponent_hand.gd" id="4_344ge"]
 [ext_resource type="Texture2D" uid="uid://b8wkgxenaief5" path="res://Art/card_back_design.png" id="4_jjvhh"]
 [ext_resource type="Script" uid="uid://bx2wsupqy8sgu" path="res://Scripts/deck.gd" id="4_kry3j"]
 [ext_resource type="Script" uid="uid://ptbduwtjtqp7" path="res://Scripts/input_manager.gd" id="6_21xkr"]
+[ext_resource type="Script" uid="uid://y5gr674dq6bj" path="res://Scripts/turn_manager.gd" id="7_6bp64"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kry3j"]
 size = Vector2(48, 64)
@@ -20,13 +22,16 @@ zoom = Vector2(2, 2)
 script = ExtResource("1_bo1nx")
 
 [node name="CardSlot" parent="." instance=ExtResource("3_8gbba")]
-position = Vector2(535, 212)
-
-[node name="CardSlot2" parent="." instance=ExtResource("3_8gbba")]
-position = Vector2(743, 214)
+position = Vector2(750, 450)
 
 [node name="PlayerHand" type="Node2D" parent="."]
+position = Vector2(800, 600)
 script = ExtResource("3_jjvhh")
+
+[node name="OpponentHand" type="Node2D" parent="."]
+position = Vector2(1130, 450)
+rotation = -1.5707964
+script = ExtResource("4_344ge")
 
 [node name="Deck" type="Node2D" parent="."]
 z_index = -2
@@ -52,5 +57,20 @@ scale = Vector2(0.5, 0.5)
 text = "52"
 horizontal_alignment = 1
 
+[node name="EndTurnButton" type="Button" parent="."]
+offset_left = 564.0
+offset_top = 431.0
+offset_right = 642.0
+offset_bottom = 462.0
+text = "End Turn
+"
+
 [node name="InputManager" type="Node2D" parent="."]
 script = ExtResource("6_21xkr")
+
+[node name="TurnManager" type="Node" parent="."]
+script = ExtResource("7_6bp64")
+
+[node name="TurnTimer" type="Timer" parent="."]
+
+[connection signal="pressed" from="EndTurnButton" to="TurnManager" method="_on_end_turn_button_pressed"]
