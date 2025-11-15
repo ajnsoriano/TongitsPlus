@@ -45,8 +45,19 @@ func opponent_turn():
 	
 	# look for melds
 	
+	# Look for sets
+	var sets = detect_sets(opponent_hand)
+	if !sets.is_empty():
+		print("Sets:")
+		for set_ in sets:
+			for card in set_:
+				print(str(card.rank) + " of " + card.suit)
+	
+	# Look for runs
+	detect_runs(opponent_hand)
+	
 	# discard unwanted cards
-	discard(opponent_hand)
+	#discard(opponent_hand)
 	# end turn
 	
 	# reset player deck draw
@@ -67,3 +78,21 @@ func discard(hand):
 	hand.remove_card_from_hand(card_to_discard)
 	
 	discard_pile.add_card(card_to_discard)
+
+func detect_sets(hand):
+	var sets = []
+	var rank_dictionary = {}
+	
+	for card in hand.opponent_hand:
+		if not rank_dictionary.has(card.rank):
+			rank_dictionary[card.rank] = []
+		rank_dictionary[card.rank].append(card)
+		
+	for rank_cards in rank_dictionary.values():
+		if rank_cards.size() >= 3:
+			sets.append(rank_cards)
+		
+	return sets
+
+func detect_runs(hand):
+	pass

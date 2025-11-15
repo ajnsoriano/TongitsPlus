@@ -20,6 +20,7 @@ zoom = Vector2(2, 2)
 
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("1_bo1nx")
+All_Face_Up = true
 
 [node name="CardSlot" parent="." instance=ExtResource("3_8gbba")]
 z_index = -1

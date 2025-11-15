@@ -1,5 +1,8 @@
 extends Node2D
 
+#DEBUG
+@export var All_Face_Up : bool
+
 const COLLISION_MASK_CARD = 1
 const COLLISION_MASK_CARD_SLOT = 8
 const DEFAULT_CARD_MOVE_SPEED = 0.1
