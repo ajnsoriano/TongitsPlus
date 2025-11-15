@@ -25,6 +25,7 @@ func add_card_to_hand(card, speed):
 	else:
 		animate_card_to_position(card, card.hand_position, DEFAULT_CARD_MOVE_SPEED)
 		
+		
 func update_hand_positions(speed):
 	for i in range(player_hand.size()):
 		# Get new card position based on index
@@ -38,6 +39,7 @@ func update_hand_positions(speed):
 		
 		animate_card_to_position(card, new_position, speed)
 		
+		
 func calculate_card_position(index):
 	var total_width = (player_hand.size() - 1) * CARD_WIDTH
 	var x_offset  = HAND_X_POSITION + index * CARD_WIDTH - total_width / 2.0
@@ -46,7 +48,8 @@ func calculate_card_position(index):
 func animate_card_to_position(card, new_position, speed):
 	var tween = get_tree().create_tween()
 	tween.tween_property(card, "position", new_position, speed)
-
+	return tween
+	
 func remove_card_from_hand(card):
 	if card in player_hand:
 		player_hand.erase(card)

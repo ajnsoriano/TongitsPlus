@@ -13,12 +13,12 @@ func _ready() -> void:
 	HAND_X_POSITION = self.position.x
 	HAND_Y_POSITION = self.position.y
 	
-func add_card_to_hand(card, speed):
+func add_card_to_hand(card, speed = DEFAULT_CARD_MOVE_SPEED):
 	if card not in opponent_hand:
 		opponent_hand.insert(0, card)
 		update_hand_positions(speed)
 	else:
-		animate_card_to_position(card, card.hand_position, DEFAULT_CARD_MOVE_SPEED, false)
+		animate_card_to_position(card, card.hand_position, speed, false)
 		
 func update_hand_positions(speed):
 	#for i in range(opponent_hand.size()):
@@ -50,6 +50,7 @@ func animate_card_to_position(card, new_position, speed, discard):
 	tween.tween_property(card, "position", new_position, speed)
 	if discard:
 		tween.parallel().tween_property(card, "rotation_degrees", 0, speed)
+	return tween
 
 func remove_card_from_hand(card):
 	if card in opponent_hand:

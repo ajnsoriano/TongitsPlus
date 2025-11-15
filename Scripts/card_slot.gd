@@ -22,6 +22,15 @@ func add_card(card):
 	card.global_position = global_pos
 	print(card.get_parent())
 	
-func draw_top_card():
-	print("Draw top card from card slot")
-	
+func draw_top_card(hand):
+	if cards_in_slot.size() > 0:
+		print("Draw top card from card slot")
+		var top_card = cards_in_slot.back()
+		top_card.get_parent().remove_child(top_card)
+		card_manager_reference.add_child(top_card)
+		top_card.global_position = self.position
+		hand.add_card_to_hand(top_card, 0.1)
+		if hand != $"../PlayerHand":
+			top_card.get_node("AnimationPlayer").play("card_flip_down")
+		top_card.get_node("Area2D/CollisionShape2D").disabled = false
+		cards_in_slot.pop_back()

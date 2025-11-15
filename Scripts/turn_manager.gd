@@ -33,10 +33,16 @@ func opponent_turn():
 	
 	# check discard pile
 	
-	# draw card 
-	deck_reference.draw_card(opponent_hand)
+	# draw card from deck
+	#deck_reference.draw_card(opponent_hand)
+	#turn_timer.start()
+	#await turn_timer.timeout
+	
+	# draw card from discard pile 
+	discard_pile.draw_top_card(opponent_hand)
 	turn_timer.start()
 	await turn_timer.timeout
+	
 	# look for melds
 	
 	# discard unwanted cards
@@ -55,6 +61,9 @@ func discard(hand):
 	
 	#high cards
 	
-	hand.animate_card_to_position(card_to_discard, discard_pile.position, DEFAULT_CARD_MOVE_SPEED, true)
-	card_to_discard.get_node("AnimationPlayer").play("card_flip")
+	var tween = hand.animate_card_to_position(card_to_discard, discard_pile.position, DEFAULT_CARD_MOVE_SPEED, true)
+	card_to_discard.get_node("AnimationPlayer").play("card_flip_up")
+	await tween.finished
 	hand.remove_card_from_hand(card_to_discard)
+	
+	discard_pile.add_card(card_to_discard)
