@@ -22,6 +22,7 @@ zoom = Vector2(2, 2)
 script = ExtResource("1_bo1nx")
 
 [node name="CardSlot" parent="." instance=ExtResource("3_8gbba")]
+z_index = -1
 position = Vector2(750, 450)
 
 [node name="PlayerHand" type="Node2D" parent="."]
@@ -29,7 +30,7 @@ position = Vector2(800, 600)
 script = ExtResource("3_jjvhh")
 
 [node name="OpponentHand" type="Node2D" parent="."]
-position = Vector2(1130, 450)
+position = Vector2(1180, 450)
 rotation = -1.5707964
 script = ExtResource("4_344ge")
 

@@ -1,11 +1,68 @@
-[gd_scene load_steps=8 format=3 uid="uid://12we0nkks0to"]
+[gd_scene load_steps=10 format=3 uid="uid://12we0nkks0to"]
 
 [ext_resource type="Script" uid="uid://dsmp5178bpf37" path="res://Scripts/card.gd" id="1_wf8id"]
 [ext_resource type="Texture2D" uid="uid://b8wkgxenaief5" path="res://Art/card_back_design.png" id="2_brehn"]
 [ext_resource type="Texture2D" uid="uid://b17ioqwwdeh5j" path="res://Art/Deck1/Clubs13.png" id="2_wf8id"]
+[ext_resource type="Shader" uid="uid://8ysgbscakqn3" path="res://Scenes/card.gdshader" id="3_eumee"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_eumee"]
+shader = ExtResource("3_eumee")
+shader_parameter/outline_size = 1.0
+shader_parameter/outline_color = Color(0.15487596, 0.154876, 0.15487596, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rjlel"]
 size = Vector2(48, 64)
+
+[sub_resource type="Animation" id="Animation_e6po8"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CardImageBack:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CardImageBack:z_index")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CardImage:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("CardImage:z_index")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [-1]
+}
 
 [sub_resource type="Animation" id="Animation_eumee"]
 resource_name = "card_flip"
@@ -60,57 +117,6 @@ tracks/3/keys = {
 "values": [-1, 0]
 }
 
-[sub_resource type="Animation" id="Animation_e6po8"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("CardImageBack:scale")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(1, 1)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("CardImageBack:z_index")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("CardImage:scale")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(1, 1)]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("CardImage:z_index")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [-1]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_bnspj"]
 _data = {
 &"RESET": SubResource("Animation_e6po8"),
@@ -125,6 +131,7 @@ texture = ExtResource("2_brehn")
 
 [node name="CardImage" type="Sprite2D" parent="."]
 z_index = -1
+material = SubResource("ShaderMaterial_eumee")
 texture = ExtResource("2_wf8id")
 
 [node name="Area2D" type="Area2D" parent="."]

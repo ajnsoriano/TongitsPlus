@@ -1,6 +1,6 @@
 extends Node2D
 
-const CARD_WIDTH = 50
+const CARD_WIDTH = 20
 const DEFAULT_CARD_MOVE_SPEED = 0.1
 
 
@@ -18,7 +18,7 @@ func add_card_to_hand(card, speed):
 		opponent_hand.insert(0, card)
 		update_hand_positions(speed)
 	else:
-		animate_card_to_position(card, card.hand_position, DEFAULT_CARD_MOVE_SPEED)
+		animate_card_to_position(card, card.hand_position, DEFAULT_CARD_MOVE_SPEED, false)
 		
 func update_hand_positions(speed):
 	#for i in range(opponent_hand.size()):
@@ -31,7 +31,7 @@ func update_hand_positions(speed):
 		var new_position = Vector2(HAND_X_POSITION, calculate_card_position(i))
 		var card = opponent_hand[i]
 		card.hand_position = new_position
-		animate_card_to_position(card, new_position, speed)
+		animate_card_to_position(card, new_position, speed, false)
 		
 		# Rotate cards to face inward (adjust depending on which side they’re on)
 		card.rotation_degrees = -90  # Right side
@@ -45,9 +45,11 @@ func calculate_card_position(index):
 	var y_offset = HAND_Y_POSITION + index * CARD_WIDTH - total_height / 2.0
 	return y_offset
 
-func animate_card_to_position(card, new_position, speed):
+func animate_card_to_position(card, new_position, speed, discard):
 	var tween = get_tree().create_tween()
 	tween.tween_property(card, "position", new_position, speed)
+	if discard:
+		tween.parallel().tween_property(card, "rotation_degrees", 0, speed)
 
 func remove_card_from_hand(card):
 	if card in opponent_hand:

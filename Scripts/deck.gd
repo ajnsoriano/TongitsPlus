@@ -14,8 +14,8 @@ func _ready() -> void:
 	$RichTextLabel.text = str(deck.size())
 	
 	 #Draw 13 cards
-	#for i in range(0, 13):
-		#draw_card()
+	for i in range(0, 13):
+		draw_card($"../PlayerHand")
 		
 func create_deck():
 	deck.clear()
@@ -45,3 +45,6 @@ func draw_card(hand):
 	hand.add_card_to_hand(new_card, CARD_DRAW_SPEED)
 	if hand == $"../PlayerHand":
 		new_card.get_node("AnimationPlayer").play("card_flip")
+	else:
+		new_card.get_node("Area2D/CollisionShape2D").disabled = true
+	#new_card.get_node("AnimationPlayer").play("card_flip")

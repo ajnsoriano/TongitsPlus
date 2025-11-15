@@ -6,6 +6,7 @@ signal left_mouse_button_released
 const COLLISION_MASK_CARD = 1
 const COLLISION_MASK_DECK = 4
 
+
 var card_manager_reference
 var deck_reference
 var player_hand_reference
@@ -31,6 +32,7 @@ func raycast_at_cursor():
 	#parameters.collision_mask = COLLISION_MASK_CARD
 	var result = space_state.intersect_point(parameters)
 	if result.size() > 0:
+		print(result[0].collider.get_parent().name)
 		var result_collision_mask = result[0].collider.collision_mask
 		if result_collision_mask == COLLISION_MASK_CARD:
 			# CARD CLICKED
