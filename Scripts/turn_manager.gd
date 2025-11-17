@@ -52,10 +52,11 @@ func opponent_turn():
 		for set_ in sets:
 			for card in set_:
 				print(str(card.rank) + " of " + card.suit)
+		print("-End Sets")
 	
 	# Look for runs
-	detect_runs(opponent_hand)
-	
+	var runs = detect_runs(opponent_hand)
+	print(runs)
 	# discard unwanted cards
 	#discard(opponent_hand)
 	# end turn
@@ -95,4 +96,53 @@ func detect_sets(hand):
 	return sets
 
 func detect_runs(hand):
-	pass
+	var runs = []
+	var suit_dictionary = {}
+	
+	# Group by suit
+	for card in hand.opponent_hand:
+		if not suit_dictionary.has(card.suit):
+			suit_dictionary[card.suit] = []
+		suit_dictionary[card.suit].append(card)
+	
+	#print(suit_dictionary)
+	
+	# Sort and find consecutive sequences
+	for suit_cards in suit_dictionary.values():
+		
+		suit_cards.sort_custom(func(a,b): return a.rank < b.rank)
+		var current_run = []
+		
+		for i in range(suit_cards.size()):
+			if current_run.is_empty():
+				current_run.append(suit_cards[i])
+			else:
+				var last_card = current_run.back()
+				if suit_cards[i].rank == last_card.rank + 1:
+					current_run.append(suit_cards[i])
+				else:
+					if current_run.size() >= 3:
+						runs.append(current_run.duplicate())
+					current_run = [suit_cards[i]]
+		
+		if current_run.size() >= 3:
+			runs.append(current_run)
+		for card in suit_cards:
+			print(str(card.rank) + " of " + card.suit)
+	
+	#for suit in suit_dictionary.keys():
+		#var suit_cards = suit_dictionary[suit]
+		#var sortable := []
+		#for card in suit_cards:
+			#sortable.append({"rank": int(card.rank), "card": card})
+		#
+		#sortable.sort()
+		#
+		#var sorted_cards := []
+		#for item in sortable:
+			#sorted_cards.append(item.card)
+		#
+		#for card in sorted_cards:
+			#print(str(card.rank) + " of " + card.suit)
+					
+	return runs
