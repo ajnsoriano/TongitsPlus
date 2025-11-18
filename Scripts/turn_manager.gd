@@ -34,14 +34,14 @@ func opponent_turn():
 	# check discard pile
 	
 	# draw card from deck
-	#deck_reference.draw_card(opponent_hand)
-	#turn_timer.start()
-	#await turn_timer.timeout
-	
-	# draw card from discard pile 
-	discard_pile.draw_top_card(opponent_hand)
+	deck_reference.draw_card(opponent_hand)
 	turn_timer.start()
 	await turn_timer.timeout
+	
+	# draw card from discard pile 
+	#discard_pile.draw_top_card(opponent_hand)
+	#turn_timer.start()
+	#await turn_timer.timeout
 	
 	# look for melds
 	
@@ -56,18 +56,50 @@ func opponent_turn():
 	
 	# Look for runs
 	var runs = detect_runs(opponent_hand)
-	print(runs)
-	# discard unwanted cards
-	#discard(opponent_hand)
-	# end turn
+	if !runs.is_empty():
+		print("Runs:")
+		for run in runs:
+			for card in run:
+				print(str(card.rank) + " of " + card.suit)
+		print("-End runs")
 	
+	var worst_card = choose_card_to_discard(opponent_hand.opponent_hand, sets, runs)
+	print("Worst card: " + str(worst_card.rank) + " of " + worst_card.suit)
+	
+	var safe_cards = {}
+	for meld in sets:
+		for card in meld:
+			safe_cards[card] = true
+	
+	for meld in runs:
+		for card in meld:
+			safe_cards[card] = true
+	
+	# discard unwanted cards
+	discard(worst_card,opponent_hand)
+	# end turn
+	var deadwood = []
+	var deadwood_value = 0
+	for card in opponent_hand.opponent_hand:
+		if not safe_cards.has(card):
+			deadwood.append(card)
+	if !deadwood.is_empty():
+		for card in deadwood:
+			if card.rank > 10:
+				deadwood_value += 10
+			else:
+				deadwood_value += card.rank
+		
+		print("Deadwood: ", deadwood_value)
+	else:
+		print("TONGITS!!!")
 	# reset player deck draw
 	
 	$"../EndTurnButton".disabled = false
 	$"../EndTurnButton".visible = true
 	
-func discard(hand):
-	var card_to_discard = hand.opponent_hand[4]
+func discard(card, hand):
+	var card_to_discard = card
 	
 	#cards that do not make a meld
 	
@@ -127,22 +159,70 @@ func detect_runs(hand):
 		
 		if current_run.size() >= 3:
 			runs.append(current_run)
-		for card in suit_cards:
-			print(str(card.rank) + " of " + card.suit)
-	
-	#for suit in suit_dictionary.keys():
-		#var suit_cards = suit_dictionary[suit]
-		#var sortable := []
 		#for card in suit_cards:
-			#sortable.append({"rank": int(card.rank), "card": card})
-		#
-		#sortable.sort()
-		#
-		#var sorted_cards := []
-		#for item in sortable:
-			#sorted_cards.append(item.card)
-		#
-		#for card in sorted_cards:
 			#print(str(card.rank) + " of " + card.suit)
 					
 	return runs
+
+func score_card_to_discard(card, hand):
+	var score = 0
+	
+	# Higher rank = worse card
+	score += card.rank 
+	
+	# check near-set potential
+	var same_rank_count = 0
+	for c in hand:
+		if c.rank == card.rank and c != card:
+			same_rank_count += 1
+	
+	# almost a set (pair)
+	if same_rank_count == 1:
+		score -= 5 
+	
+	# check near-run potential
+	for c in hand:
+		if c != card and c.suit == card.suit:
+			if abs(c.rank - card.rank) == 1:
+				score -= 4 # one rank away from a run
+			if abs(c.rank - card.rank) == 2:
+				score -= 2 # two ranks away from a run (not as good but still worth keeping imo)
+			
+	return score
+	
+func choose_card_to_discard(hand, sets, runs):
+	
+	# identify safe cards 
+	var safe_cards = {}
+	for meld in sets:
+		for card in meld:
+			safe_cards[card] = true
+	
+	for meld in runs:
+		for card in meld:
+			safe_cards[card] = true
+	
+	# candidates are cards not in melds
+	var candidates = []
+	for c in hand:
+		if not safe_cards.has(c):
+			candidates.append(c)
+		
+	if candidates.size() == 0:
+		var highest = hand[0]
+		for c in hand:
+			if c.rank > highest.rank:
+				highest = c
+		return highest
+	
+	# score candidates
+	var worst_card = null
+	var highest_score = -9999
+	
+	for c in candidates:
+		var s = score_card_to_discard(c, hand)
+		if s > highest_score:
+			highest_score = s
+			worst_card = c
+	
+	return worst_card
