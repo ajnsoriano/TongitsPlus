@@ -1,7 +1,7 @@
 extends Node
 
 const DEFAULT_CARD_MOVE_SPEED = 0.1
-
+var turn = 1
 var turn_timer
 var deck_reference
 var opponent_hand
@@ -15,7 +15,7 @@ func _ready() -> void:
 	opponent_hand = $"../OpponentHand"
 	discard_pile = $"../CardSlot"
 	
-	for i in range(0, 13):
+	for i in range(1, 13):
 		deck_reference.draw_card(opponent_hand)
 		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -28,6 +28,8 @@ func _on_end_turn_button_pressed() -> void:
 	opponent_turn()
 	
 func opponent_turn():
+	print("TURN: ", turn)
+	turn += 1
 	$"../EndTurnButton".disabled = true
 	$"../EndTurnButton".visible = false
 	
@@ -45,50 +47,49 @@ func opponent_turn():
 	
 	# look for melds
 	
+	var meld_result = find_melds(opponent_hand.opponent_hand)
+	var sets = meld_result["sets"]
+	var runs = meld_result["runs"]
+	var deadwood = meld_result["deadwood"]
+	
+	
 	# Look for sets
-	var sets = detect_sets(opponent_hand)
+	#var sets = detect_sets(opponent_hand)
 	if !sets.is_empty():
 		print("Sets:")
 		for set_ in sets:
 			for card in set_:
 				print(str(card.rank) + " of " + card.suit)
 		print("-End Sets")
-	
-	# Look for runs
-	var runs = detect_runs(opponent_hand)
+	#
+	## Look for runs
+	#var runs = detect_runs(opponent_hand)
 	if !runs.is_empty():
 		print("Runs:")
 		for run in runs:
 			for card in run:
 				print(str(card.rank) + " of " + card.suit)
 		print("-End runs")
-	
+	#
 	var worst_card = choose_card_to_discard(opponent_hand.opponent_hand, sets, runs)
 	print("Worst card: " + str(worst_card.rank) + " of " + worst_card.suit)
 	
-	var safe_cards = {}
-	for meld in sets:
-		for card in meld:
-			safe_cards[card] = true
-	
-	for meld in runs:
-		for card in meld:
-			safe_cards[card] = true
-	
-	# discard unwanted cards
+	## discard unwanted cards
 	discard(worst_card,opponent_hand)
-	# end turn
-	var deadwood = []
+	## end turn
+	
 	var deadwood_value = 0
-	for card in opponent_hand.opponent_hand:
-		if not safe_cards.has(card):
-			deadwood.append(card)
+
+	
 	if !deadwood.is_empty():
+		print("Deadwood cards:")
 		for card in deadwood:
-			if card.rank > 10:
-				deadwood_value += 10
-			else:
-				deadwood_value += card.rank
+			if card != worst_card:
+				print(str(card.rank) + " of " + card.suit)
+				if card.rank > 10:
+					deadwood_value += 10
+				else:
+					deadwood_value += card.rank
 		
 		print("Deadwood: ", deadwood_value)
 	else:
@@ -226,3 +227,85 @@ func choose_card_to_discard(hand, sets, runs):
 			worst_card = c
 	
 	return worst_card
+
+func find_melds(hand):
+	var sets = []
+	var runs = []
+	
+	var rank_map := {}
+	# find sets
+	for card in hand:
+		if not rank_map.has(card.rank):
+			rank_map[card.rank] = []
+		rank_map[card.rank].append(card)
+		
+	for rank in rank_map.keys():
+		var group = rank_map[rank]
+		if group.size() >= 3:
+			sets.append(group.duplicate())
+	
+	# find runs
+	var suit_map := {}
+	for card in hand:
+		if not suit_map.has(card.suit):
+			suit_map[card.suit] = []
+		suit_map[card.suit].append(card)
+	
+	for suit in suit_map.keys():
+		var cards = suit_map[suit]
+		#print("CHECKPOINT")
+		#print(cards)
+		# sort by rank
+		cards.sort_custom(func(a,b): return a.rank < b.rank)
+		#print(cards)
+		#print("END CHECKPOINT")
+		var current_run = []
+		
+		for i in range(cards.size()):
+			if current_run.is_empty():
+				current_run.append(cards[i])
+			else:
+				var last_rank = current_run.back().rank
+				if cards[i].rank == last_rank + 1:
+					current_run.append(cards[i])
+				else:
+					if current_run.size() >= 3:
+						runs.append(current_run.duplicate())
+					current_run = [cards[i]]
+		
+		if current_run.size() >= 3:
+			runs.append(current_run.duplicate())
+	
+	# remove overlap
+	var used_cards := {}
+	
+	# mark cards used in sets so they cannot appear in runs
+	for meld in sets:
+		for c in meld:
+			used_cards[c] = true
+	
+	# filter runs to remove any that contain used cards
+	var final_runs := []
+	for run in runs:
+		var ok = true
+		for c in run:
+			if used_cards.has(c):
+				ok = false
+				break
+		if ok:
+			final_runs.append(run)
+			# mark run cards too
+			for c in run:
+				used_cards[c] = true
+	
+	# list unmatched cards/deadwood
+	var unmatched := []
+	for c in hand:
+		if not used_cards.has(c):
+			unmatched.append(c)
+	
+	return {
+		"sets": sets,
+		"runs": final_runs,
+		"deadwood": unmatched
+	}
