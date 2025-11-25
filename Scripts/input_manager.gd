@@ -11,11 +11,13 @@ var card_manager_reference
 var deck_reference
 var player_hand_reference
 var card_slot_reference
+
 func _ready() -> void:
 	card_manager_reference = $"../CardManager"
 	deck_reference = $"../Deck"
 	player_hand_reference = $"../PlayerHand"
 	card_slot_reference = $"../CardSlot"
+	
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
@@ -36,7 +38,7 @@ func raycast_at_cursor():
 		if result_collision_mask == COLLISION_MASK_CARD:
 			# CARD CLICKED
 			var card_found = result[0].collider.get_parent()
-			#card_found.print_card_data()s
+			#card_found.print_card_data()
 			if card_found:
 				card_manager_reference.start_drag(card_found)
 		elif result_collision_mask == COLLISION_MASK_DECK:

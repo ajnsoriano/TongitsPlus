@@ -19,8 +19,8 @@ func _ready() -> void:
 		deck_reference.draw_card(opponent_hand)
 		
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+#func _process(delta: float) -> void:
+	#pass
 
 
 
@@ -34,36 +34,30 @@ func opponent_turn():
 	$"../EndTurnButton".visible = false
 	
 	# check discard pile
-	
-	# draw card from deck
-	deck_reference.draw_card(opponent_hand)
-	turn_timer.start()
-	await turn_timer.timeout
-	
-	# draw card from discard pile 
-	#discard_pile.draw_top_card(opponent_hand)
-	#turn_timer.start()
-	#await turn_timer.timeout
-	
+	var draw_from_discard = check_discard_pile(opponent_hand.opponent_hand, discard_pile)
+	if draw_from_discard:
+		#draw from discard
+		discard_pile.draw_top_card(opponent_hand)
+		turn_timer.start()
+		await turn_timer.timeout
+	else:
+		# draw card from deck
+		deck_reference.draw_card(opponent_hand)
+		turn_timer.start()
+		await turn_timer.timeout
+		
 	# look for melds
-	
 	var meld_result = find_melds(opponent_hand.opponent_hand)
 	var sets = meld_result["sets"]
 	var runs = meld_result["runs"]
 	var deadwood = meld_result["deadwood"]
-	
-	
-	# Look for sets
-	#var sets = detect_sets(opponent_hand)
+
 	if !sets.is_empty():
 		print("Sets:")
 		for set_ in sets:
 			for card in set_:
 				print(str(card.rank) + " of " + card.suit)
 		print("-End Sets")
-	#
-	## Look for runs
-	#var runs = detect_runs(opponent_hand)
 	if !runs.is_empty():
 		print("Runs:")
 		for run in runs:
@@ -80,7 +74,6 @@ func opponent_turn():
 	
 	var deadwood_value = 0
 
-	
 	if !deadwood.is_empty():
 		print("Deadwood cards:")
 		for card in deadwood:
@@ -92,7 +85,7 @@ func opponent_turn():
 					deadwood_value += card.rank
 		
 		print("Deadwood: ", deadwood_value)
-	else:
+	if deadwood_value == 0:
 		print("TONGITS!!!")
 	# reset player deck draw
 	
@@ -106,64 +99,12 @@ func discard(card, hand):
 	
 	#high cards
 	
-	var tween = hand.animate_card_to_position(card_to_discard, discard_pile.position, DEFAULT_CARD_MOVE_SPEED, true)
+	var tween = hand.animate_card_to_position(card_to_discard, discard_pile.position, 0.5, true)
 	card_to_discard.get_node("AnimationPlayer").play("card_flip_up")
 	await tween.finished
 	hand.remove_card_from_hand(card_to_discard)
 	
 	discard_pile.add_card(card_to_discard)
-
-func detect_sets(hand):
-	var sets = []
-	var rank_dictionary = {}
-	
-	for card in hand.opponent_hand:
-		if not rank_dictionary.has(card.rank):
-			rank_dictionary[card.rank] = []
-		rank_dictionary[card.rank].append(card)
-		
-	for rank_cards in rank_dictionary.values():
-		if rank_cards.size() >= 3:
-			sets.append(rank_cards)
-		
-	return sets
-
-func detect_runs(hand):
-	var runs = []
-	var suit_dictionary = {}
-	
-	# Group by suit
-	for card in hand.opponent_hand:
-		if not suit_dictionary.has(card.suit):
-			suit_dictionary[card.suit] = []
-		suit_dictionary[card.suit].append(card)
-	
-	#print(suit_dictionary)
-	
-	# Sort and find consecutive sequences
-	for suit_cards in suit_dictionary.values():
-		
-		suit_cards.sort_custom(func(a,b): return a.rank < b.rank)
-		var current_run = []
-		
-		for i in range(suit_cards.size()):
-			if current_run.is_empty():
-				current_run.append(suit_cards[i])
-			else:
-				var last_card = current_run.back()
-				if suit_cards[i].rank == last_card.rank + 1:
-					current_run.append(suit_cards[i])
-				else:
-					if current_run.size() >= 3:
-						runs.append(current_run.duplicate())
-					current_run = [suit_cards[i]]
-		
-		if current_run.size() >= 3:
-			runs.append(current_run)
-		#for card in suit_cards:
-			#print(str(card.rank) + " of " + card.suit)
-					
-	return runs
 
 func score_card_to_discard(card, hand):
 	var score = 0
@@ -227,11 +168,11 @@ func choose_card_to_discard(hand, sets, runs):
 			worst_card = c
 	
 	return worst_card
-
+	
 func find_melds(hand):
 	var sets = []
 	var runs = []
-	
+	var deadwood = []
 	var rank_map := {}
 	# find sets
 	for card in hand:
@@ -249,63 +190,110 @@ func find_melds(hand):
 	for card in hand:
 		if not suit_map.has(card.suit):
 			suit_map[card.suit] = []
-		suit_map[card.suit].append(card)
+		if not in_any_set(card, sets):
+			suit_map[card.suit].append(card)
 	
-	for suit in suit_map.keys():
+	for suit in suit_map:
+		suit_map[suit].sort_custom(func(a, b): return a.rank < b.rank)
+
+	for suit in suit_map:
 		var cards = suit_map[suit]
-		#print("CHECKPOINT")
-		#print(cards)
-		# sort by rank
-		cards.sort_custom(func(a,b): return a.rank < b.rank)
-		#print(cards)
-		#print("END CHECKPOINT")
-		var current_run = []
+		if cards.size() < 3:
+			continue
 		
-		for i in range(cards.size()):
-			if current_run.is_empty():
-				current_run.append(cards[i])
+		var current_run = [cards[0]]
+		
+		for i in range(1, cards.size()):
+			var prev = cards[i - 1]
+			var curr = cards[i]
+			
+			if curr.rank == prev.rank + 1:
+				current_run.append(curr)
 			else:
-				var last_rank = current_run.back().rank
-				if cards[i].rank == last_rank + 1:
-					current_run.append(cards[i])
-				else:
-					if current_run.size() >= 3:
-						runs.append(current_run.duplicate())
-					current_run = [cards[i]]
+				if current_run.size() >= 3:
+					runs.append(current_run.duplicate())
+				current_run = [curr]
 		
 		if current_run.size() >= 3:
-			runs.append(current_run.duplicate())
+			runs.append(current_run)
 	
-	# remove overlap
-	var used_cards := {}
-	
-	# mark cards used in sets so they cannot appear in runs
-	for meld in sets:
-		for c in meld:
-			used_cards[c] = true
-	
-	# filter runs to remove any that contain used cards
-	var final_runs := []
-	for run in runs:
-		var ok = true
-		for c in run:
-			if used_cards.has(c):
-				ok = false
-				break
-		if ok:
-			final_runs.append(run)
-			# mark run cards too
-			for c in run:
-				used_cards[c] = true
-	
-	# list unmatched cards/deadwood
-	var unmatched := []
-	for c in hand:
-		if not used_cards.has(c):
-			unmatched.append(c)
-	
+	#compute deadwood
+	for card in hand:
+		if not in_any_meld(card, sets) and not in_any_meld(card, runs):
+			deadwood.append(card)
+		
 	return {
 		"sets": sets,
-		"runs": final_runs,
-		"deadwood": unmatched
+		"runs": runs,
+		"deadwood": deadwood
 	}
+	
+func in_any_meld(card, meld_list):
+			for meld in meld_list:
+				if card in meld:
+					return true
+			return false
+
+func does_discard_complete_set(hand, card):
+	var count = 0
+	for c in hand:
+		if c.rank == card.rank:
+			count += 1
+	return count >= 2
+	
+func does_discard_help_run(hand, card, runs, sets):
+	#TODO CHANGE THIS FUNCTION TO USE RUNS RETURNED IN find_melds(), CHECK IF IT EXTENDS EXISTING
+	#RUNS THEN CHECK IF CARD CAN CREATE NEW RUNS
+	
+	# extends a run
+	for run in runs:
+		if run[0].suit != card.suit:
+			continue
+	
+		var low = run[0].rank
+		var high = run.back().rank
+		
+		if card.rank == low - 1:
+			return true
+		if card.rank == high + 1:
+			return true
+	
+	# creates new run
+	
+	#collect ranks of same suit that are not part of sets
+	var suit_ranks = []
+	for c in hand:
+		if c.suit == card.suit and not in_any_set(c, sets):
+			suit_ranks.append(c.rank)
+	
+	# (card-2, card-1, card)
+	if suit_ranks.has(card.rank - 2) and suit_ranks.has(card.rank - 1):
+		return true
+	# (card-1, card, card+1)
+	if suit_ranks.has(card.rank - 1) and suit_ranks.has(card.rank + 1):
+		return true
+	# (card, card+1, card+2)
+	if suit_ranks.has(card.rank + 1) and suit_ranks.has(card.rank + 2):
+		return true
+	
+	return false
+
+func in_any_set(card, sets):
+	for s in sets:
+		if card in s:
+			return true
+	return false
+
+func check_discard_pile(hand, discard_slot):
+	var top = discard_slot.cards_in_slot.back()
+	if top != null:
+		#complete set
+		var melds = find_melds(hand)
+		var runs = melds["runs"]
+		var sets = melds["sets"]
+		if does_discard_complete_set(hand, top):
+			return true
+		#helps run
+		if does_discard_help_run(hand, top, runs, sets):
+			return true
+	return false

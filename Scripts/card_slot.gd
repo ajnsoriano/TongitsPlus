@@ -27,7 +27,7 @@ func draw_top_card(hand):
 		top_card.get_parent().remove_child(top_card)
 		card_manager_reference.add_child(top_card)
 		top_card.global_position = self.position
-		hand.add_card_to_hand(top_card, 0.1)
+		hand.add_card_to_hand(top_card, 0.5)
 		if hand != $"../PlayerHand" and !card_manager_reference.All_Face_Up:
 			top_card.get_node("AnimationPlayer").play("card_flip_down")
 			top_card.get_node("Area2D/CollisionShape2D").disabled = true
