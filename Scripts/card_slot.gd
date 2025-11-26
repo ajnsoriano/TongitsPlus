@@ -12,7 +12,7 @@ func _ready() -> void:
 func add_card(card):
 	# add to card stack
 	cards_in_slot.append(card)
-	
+	card.z_index = 0
 	# set card position to card slot position
 	card.position = self.position
 	var global_pos = card.global_position
@@ -20,6 +20,8 @@ func add_card(card):
 	card.get_parent().remove_child(card)
 	self.add_child(card)
 	card.global_position = global_pos
+	#card.position = global_pos
+	
 	
 func draw_top_card(hand):
 	if cards_in_slot.size() > 0:
@@ -27,7 +29,7 @@ func draw_top_card(hand):
 		top_card.get_parent().remove_child(top_card)
 		card_manager_reference.add_child(top_card)
 		top_card.global_position = self.position
-		hand.add_card_to_hand(top_card, 0.5)
+		hand.add_card_to_hand(top_card, 0.1)
 		if hand != $"../PlayerHand" and !card_manager_reference.All_Face_Up:
 			top_card.get_node("AnimationPlayer").play("card_flip_down")
 			top_card.get_node("Area2D/CollisionShape2D").disabled = true

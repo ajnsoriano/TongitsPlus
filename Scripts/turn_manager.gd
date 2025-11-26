@@ -87,6 +87,10 @@ func opponent_turn():
 		print("Deadwood: ", deadwood_value)
 	if deadwood_value == 0:
 		print("TONGITS!!!")
+		turn_timer.wait_time = 0.5
+		turn_timer.start()
+		await(turn_timer)
+		get_tree().quit()
 	# reset player deck draw
 	
 	$"../EndTurnButton".disabled = false

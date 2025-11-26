@@ -36,7 +36,7 @@ func create_deck():
 			deck.append(card)
 
 func draw_card(hand):
-	if deck.size() > 0:
+	if deck.size() > 0 and hand.check_hand_size():
 		var card_drawn = deck[0]
 		deck.erase(card_drawn)
 		

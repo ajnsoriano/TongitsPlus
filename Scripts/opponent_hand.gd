@@ -56,3 +56,8 @@ func remove_card_from_hand(card):
 	if card in opponent_hand:
 		opponent_hand.erase(card)
 		update_hand_positions(DEFAULT_CARD_MOVE_SPEED)
+
+func check_hand_size():
+	if opponent_hand.size() < 13:
+		return true
+	return false

@@ -22,7 +22,9 @@ func _process(_delta: float) -> void:
 	if card_being_dragged:
 		var mouse_pos = get_global_mouse_position()
 		card_being_dragged.position = Vector2(clamp(mouse_pos.x, 0, screen_size.x), clamp(mouse_pos.y, 0, screen_size.y))
-
+		player_hand_reference.update_card_order(card_being_dragged)
+		player_hand_reference.update_hand_positions(0.1)
+		
 func start_drag(card):
 	card_being_dragged = card
 	
@@ -40,19 +42,19 @@ func finish_drag():
 	if card_slot_found:
 		
 		player_hand_reference.remove_card_from_hand(card_being_dragged)
-		#card_being_dragged.position = card_slot_found.position
 		card_being_dragged.get_node("Area2D/CollisionShape2D").disabled = true
 		card_slot_found.card_in_slot = true
-		#card_being_dragged.z_index = card_slot_found.global_z_index
-		#card_slot_found.global_z_index += 1
 		card_slot_found.add_card(card_being_dragged)
-		#self.remove_child((card_being_dragged))
-		#card_slot_found.add_child(card_being_dragged)
+		
 	else:
-		player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
-	
+		player_hand_reference.update_card_order(card_being_dragged)
+		card_being_dragged = null
+		player_hand_reference.update_hand_positions(DEFAULT_CARD_MOVE_SPEED)
+		
+	#player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
+		
 	card_being_dragged = null
-
+	#player_hand_reference.update_hand_positions(DEFAULT_CARD_MOVE_SPEED)
 func connect_card_signals(card):
 	card.connect("hovered", on_hovered_over_card)
 	card.connect("hovered_off", on_hovered_off_card)

@@ -20,11 +20,10 @@ zoom = Vector2(2, 2)
 
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("1_bo1nx")
-All_Face_Up = true
 
 [node name="CardSlot" parent="." instance=ExtResource("3_8gbba")]
 z_index = -1
-position = Vector2(750, 450)
+position = Vector2(750, 350)
 
 [node name="PlayerHand" type="Node2D" parent="."]
 position = Vector2(800, 600)
@@ -37,7 +36,7 @@ script = ExtResource("4_344ge")
 
 [node name="Deck" type="Node2D" parent="."]
 z_index = -2
-position = Vector2(800, 450)
+position = Vector2(800, 350)
 script = ExtResource("4_kry3j")
 
 [node name="Area2D" type="Area2D" parent="Deck"]
