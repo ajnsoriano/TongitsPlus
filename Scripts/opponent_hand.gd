@@ -3,7 +3,7 @@ extends Node2D
 const CARD_WIDTH = 20
 const DEFAULT_CARD_MOVE_SPEED = 0.1
 
-
+var player_index = 2
 var opponent_hand = []
 var HAND_X_POSITION
 var HAND_Y_POSITION
@@ -61,3 +61,8 @@ func check_hand_size():
 	if opponent_hand.size() < 13:
 		return true
 	return false
+	
+func clear():
+	for card in opponent_hand:
+		card.queue_free()
+	opponent_hand.clear()

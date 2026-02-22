@@ -11,10 +11,7 @@ var deck = []
 func _ready() -> void:
 	card_manager_reference = $"../CardManager"
 	
-	create_deck()
-	deck.shuffle()
-	deck.shuffle()
-	deck.shuffle()
+	#create_deck()
 	
 	$RichTextLabel.text = str(deck.size())
 	
@@ -34,6 +31,9 @@ func create_deck():
 				"id": str(suit + str(rank))
 			}
 			deck.append(card)
+	deck.shuffle()
+	deck.shuffle()
+	deck.shuffle()
 
 func draw_card(hand):
 	if deck.size() > 0 and hand.check_hand_size():

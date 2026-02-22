@@ -4,8 +4,13 @@ const DEFAULT_CARD_MOVE_SPEED = 0.1
 var turn = 1
 var turn_timer
 var deck_reference
+var card_manager_reference
 var opponent_hand
 var discard_pile
+var current_player_index
+var player_hand
+var players = 2
+var deadwood_text
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	turn_timer = $"../TurnTimer"
@@ -13,18 +18,48 @@ func _ready() -> void:
 	turn_timer.wait_time = 1.0
 	deck_reference = $"../Deck"
 	opponent_hand = $"../OpponentHand"
-	discard_pile = $"../CardSlot"
+	discard_pile = $"../DiscardSlot"
+	player_hand = $"../PlayerHand"
+	deadwood_text = opponent_hand.get_node("DeadwoodCounter")
 	
+	card_manager_reference = $"../CardManager"
+	card_manager_reference.connect("card_discarded", _on_card_discarded)
+	
+	start_game()
+		#$"../EndTurnButton".disabled = false
+		#$"../EndTurnButton".visible = true
+		
+
+func start_game():
+	deadwood_text.visible = false
+	deck_reference.create_deck()
 	for i in range(1, 13):
 		deck_reference.draw_card(opponent_hand)
-		
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta: float) -> void:
-	#pass
+		deck_reference.draw_card(player_hand)
+		await get_tree().create_timer(0.1).timeout
+	
+	var starting_player = randi_range(1, players)
+	starting_player = 1 # TEMPORARY
+	if starting_player == 2:
+		current_player_index = 2
+		opponent_turn()
+	elif starting_player == 1:
+		deck_reference.draw_card(player_hand)
+		player_hand.state = player_hand.PlayerState.PLAYING
+		current_player_index = 1
 
 
+func _on_card_discarded():
+	#turn_timer.wait_time = 2
+	turn_timer.start()
+	await turn_timer.timeout
+	_on_end_turn_button_pressed()
+
+func pass_turn():
+	player_hand.state = player_hand.PlayerState.DRAWING
 
 func _on_end_turn_button_pressed() -> void:
+	current_player_index = 2
 	opponent_turn()
 	
 func opponent_turn():
@@ -69,7 +104,8 @@ func opponent_turn():
 	print("Worst card: " + str(worst_card.rank) + " of " + worst_card.suit)
 	
 	## discard unwanted cards
-	discard(worst_card,opponent_hand)
+	await discard(worst_card,opponent_hand)
+	
 	## end turn
 	
 	var deadwood_value = 0
@@ -85,16 +121,33 @@ func opponent_turn():
 					deadwood_value += card.rank
 		
 		print("Deadwood: ", deadwood_value)
+	
+	
 	if deadwood_value == 0:
 		print("TONGITS!!!")
 		turn_timer.wait_time = 0.5
 		turn_timer.start()
 		await(turn_timer)
-		get_tree().quit()
+		#get_tree().quit()
+		if !deadwood_text.visible:
+			deadwood_text.visible = true
+		deadwood_text.text = "CPU WINS"
+		reveal_cards(opponent_hand)
+		return
+	else:
+		deadwood_text = opponent_hand.get_node("DeadwoodCounter")
+		deadwood_text.text = str(deadwood_value)
+		
 	# reset player deck draw
 	
-	$"../EndTurnButton".disabled = false
-	$"../EndTurnButton".visible = true
+	current_player_index = 1
+	pass_turn()
+	#$"../EndTurnButton".disabled = false
+	#$"../EndTurnButton".visible = true
+	
+func reveal_cards(hand):
+	for card in hand.opponent_hand:
+		card.get_node("AnimationPlayer").play("card_flip_up")
 	
 func discard(card, hand):
 	var card_to_discard = card
@@ -106,10 +159,10 @@ func discard(card, hand):
 	var tween = hand.animate_card_to_position(card_to_discard, discard_pile.position, 0.5, true)
 	card_to_discard.get_node("AnimationPlayer").play("card_flip_up")
 	await tween.finished
-	hand.remove_card_from_hand(card_to_discard)
 	
-	discard_pile.add_card(card_to_discard)
-
+	hand.remove_card_from_hand(card_to_discard)
+	discard_pile.add_card(card_to_discard) 
+	
 func score_card_to_discard(card, hand):
 	var score = 0
 	
@@ -301,3 +354,10 @@ func check_discard_pile(hand, discard_slot):
 		if does_discard_help_run(hand, top, runs, sets):
 			return true
 	return false
+	
+func _on_restart_button_pressed() -> void:
+	discard_pile.clear()
+	player_hand.clear()
+	opponent_hand.clear()
+	deck_reference.create_deck()
+	start_game()

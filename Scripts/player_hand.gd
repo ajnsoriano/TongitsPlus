@@ -4,17 +4,31 @@ const CARD_WIDTH = 40
 #const CARD_WIDTH = 25
 const DEFAULT_CARD_MOVE_SPEED = 0.1
 
+enum PlayerState {
+	IDLE,
+	DRAWING,
+	PLAYING,
+	DISCARDING
+}
 
+var state : PlayerState = PlayerState.IDLE
+var player_index = 1
 var player_hand = []
 var HAND_X_POSITION
 var HAND_Y_POSITION
 var card_manager_reference
+var player_state_text_reference
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#HAND_X_POSITION = $"../Camera2D".get_screen_center_position().x
 	HAND_X_POSITION = self.position.x
 	HAND_Y_POSITION = self.position.y
 	card_manager_reference = $"../CardManager"
+	player_state_text_reference = $PlayerState
+
+func _process(delta: float) -> void:
+	player_state_text_reference.text = PlayerState.find_key(state)	
+	
 func add_card_to_hand(card, speed):
 	if card not in player_hand:
 		# left most card on top
@@ -41,7 +55,7 @@ func update_hand_positions(speed):
 		
 		#card.z_index = i
 		# Fanning out cards in hand (come back to this)
-		#card.rotation_degrees = 180 + (i - player_hand.size() / 2.0) * 3s
+		#card.rotation_degrees = 180 + (i - player_hand.size() / 2.0) * 3
 		
 		animate_card_to_position(card, new_position, speed)
 		
@@ -76,3 +90,8 @@ func check_hand_size():
 	if player_hand.size() < 13:
 		return true
 	return false
+	
+func clear():
+	for card in player_hand:
+		card.queue_free()
+	player_hand.clear()

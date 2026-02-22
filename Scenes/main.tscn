@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c1eugftio4pke"]
+[gd_scene format=3 uid="uid://c1eugftio4pke"]
 
 [ext_resource type="Script" uid="uid://gkmi1ujywskx" path="res://Scripts/card_manager.gd" id="1_bo1nx"]
 [ext_resource type="PackedScene" uid="uid://bmuc62odcbhup" path="res://Scenes/card_slot.tscn" id="3_8gbba"]
@@ -12,44 +12,68 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kry3j"]
 size = Vector2(48, 64)
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1261535490]
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1503214521]
 position = Vector2(800, 450)
 zoom = Vector2(2, 2)
 
-[node name="CardManager" type="Node2D" parent="."]
+[node name="CardManager" type="Node2D" parent="." unique_id=2086998410]
 script = ExtResource("1_bo1nx")
 
-[node name="CardSlot" parent="." instance=ExtResource("3_8gbba")]
+[node name="DiscardSlot" parent="." unique_id=1717867989 instance=ExtResource("3_8gbba")]
 z_index = -1
 position = Vector2(750, 350)
 
-[node name="PlayerHand" type="Node2D" parent="."]
+[node name="PlayerHand" type="Node2D" parent="." unique_id=769763844]
 position = Vector2(800, 600)
 script = ExtResource("3_jjvhh")
 
-[node name="OpponentHand" type="Node2D" parent="."]
+[node name="PlayerState" type="RichTextLabel" parent="PlayerHand" unique_id=207178711]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -67.0
+offset_top = -108.0
+offset_right = 67.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "PlayerState"
+horizontal_alignment = 1
+
+[node name="OpponentHand" type="Node2D" parent="." unique_id=1811458098]
 position = Vector2(1180, 450)
 rotation = -1.5707964
 script = ExtResource("4_344ge")
 
-[node name="Deck" type="Node2D" parent="."]
+[node name="DeadwoodCounter" type="RichTextLabel" parent="OpponentHand" unique_id=1235694028]
+visible = false
+offset_left = 19.000006
+offset_top = -163.0
+offset_right = 115.00001
+offset_bottom = -123.0
+rotation = 1.5707964
+text = "DeadWood"
+
+[node name="Deck" type="Node2D" parent="." unique_id=608253163]
 z_index = -2
 position = Vector2(800, 350)
 script = ExtResource("4_kry3j")
 
-[node name="Area2D" type="Area2D" parent="Deck"]
+[node name="Area2D" type="Area2D" parent="Deck" unique_id=337785969]
 collision_layer = 4
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Deck/Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Deck/Area2D" unique_id=327092947]
 shape = SubResource("RectangleShape2D_kry3j")
 
-[node name="Sprite2D" type="Sprite2D" parent="Deck"]
+[node name="Sprite2D" type="Sprite2D" parent="Deck" unique_id=265534697]
 texture = ExtResource("4_jjvhh")
 
-[node name="RichTextLabel" type="RichTextLabel" parent="Deck"]
+[node name="RichTextLabel" type="RichTextLabel" parent="Deck" unique_id=760688717]
 offset_left = -10.0
 offset_top = -43.0
 offset_right = 30.0
@@ -58,20 +82,30 @@ scale = Vector2(0.5, 0.5)
 text = "52"
 horizontal_alignment = 1
 
-[node name="EndTurnButton" type="Button" parent="."]
+[node name="EndTurnButton" type="Button" parent="." unique_id=389862101]
+visible = false
 offset_left = 564.0
 offset_top = 431.0
 offset_right = 642.0
 offset_bottom = 462.0
+disabled = true
 text = "End Turn
 "
 
-[node name="InputManager" type="Node2D" parent="."]
+[node name="RestartButton" type="Button" parent="." unique_id=1378271154]
+offset_left = 767.0
+offset_top = 450.0
+offset_right = 832.0
+offset_bottom = 481.0
+text = "Restart"
+
+[node name="InputManager" type="Node2D" parent="." unique_id=2074661080]
 script = ExtResource("6_21xkr")
 
-[node name="TurnManager" type="Node" parent="."]
+[node name="TurnManager" type="Node" parent="." unique_id=1967918140]
 script = ExtResource("7_6bp64")
 
-[node name="TurnTimer" type="Timer" parent="."]
+[node name="TurnTimer" type="Timer" parent="." unique_id=540429749]
 
 [connection signal="pressed" from="EndTurnButton" to="TurnManager" method="_on_end_turn_button_pressed"]
+[connection signal="pressed" from="RestartButton" to="TurnManager" method="_on_restart_button_pressed"]

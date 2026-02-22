@@ -36,3 +36,10 @@ func draw_top_card(hand):
 		else:
 			top_card.get_node("Area2D/CollisionShape2D").disabled = false
 		cards_in_slot.pop_back()
+		
+func clear():
+	for card in cards_in_slot:
+		card.queue_free()
+	cards_in_slot.clear()
+	#for card in get_children():
+		#card.queue_free()

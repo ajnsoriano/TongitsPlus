@@ -12,10 +12,15 @@ var card_being_dragged
 var screen_size
 var is_hovering_on_card
 var player_hand_reference
+var turn_manager_reference 
+
+signal card_discarded()
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	screen_size = get_viewport_rect().size
 	player_hand_reference = $"../PlayerHand"
+	turn_manager_reference = $"../TurnManager"
 	$"../InputManager".connect("left_mouse_button_released", on_left_click_released)
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -38,22 +43,24 @@ func finish_drag():
 	# Card dropped in empty card slot
 	#if card_slot_found and not card_slot_found.card_in_slot:
 	
-	#Card dropped in card slot (can stack cards on top of card slot)
-	if card_slot_found:
+	#Card dropped in card slot (can stack cards on top of card slot) 
+	# DISCARD
+	if card_slot_found and turn_manager_reference.current_player_index == 1 and player_hand_reference.state == player_hand_reference.PlayerState.PLAYING:
 		
 		player_hand_reference.remove_card_from_hand(card_being_dragged)
 		card_being_dragged.get_node("Area2D/CollisionShape2D").disabled = true
 		card_slot_found.card_in_slot = true
 		card_slot_found.add_card(card_being_dragged)
-		
+		card_being_dragged = null
+		return true
 	else:
 		player_hand_reference.update_card_order(card_being_dragged)
 		card_being_dragged = null
 		player_hand_reference.update_hand_positions(DEFAULT_CARD_MOVE_SPEED)
-		
+		return false
 	#player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
 		
-	card_being_dragged = null
+	#card_being_dragged = null
 	#player_hand_reference.update_hand_positions(DEFAULT_CARD_MOVE_SPEED)
 func connect_card_signals(card):
 	card.connect("hovered", on_hovered_over_card)
@@ -61,8 +68,10 @@ func connect_card_signals(card):
 
 func on_left_click_released():
 	if card_being_dragged:
-		finish_drag()
-
+		var discarded = finish_drag()
+		if discarded:
+			player_hand_reference.state = player_hand_reference.PlayerState.DISCARDING
+			emit_signal("card_discarded")
 func on_hovered_over_card(card):
 	if !is_hovering_on_card:
 		is_hovering_on_card = true

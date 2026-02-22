@@ -16,7 +16,7 @@ func _ready() -> void:
 	card_manager_reference = $"../CardManager"
 	deck_reference = $"../Deck"
 	player_hand_reference = $"../PlayerHand"
-	card_slot_reference = $"../CardSlot"
+	card_slot_reference = $"../DiscardSlot"
 	
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -26,6 +26,7 @@ func _input(event: InputEvent) -> void:
 		else:
 			emit_signal("left_mouse_button_released")
 
+# Player control
 func raycast_at_cursor():
 	var space_state = get_viewport().world_2d.direct_space_state
 	var parameters = PhysicsPointQueryParameters2D.new()
@@ -43,7 +44,17 @@ func raycast_at_cursor():
 				card_manager_reference.start_drag(card_found)
 		elif result_collision_mask == COLLISION_MASK_DECK:
 			# DECK CLICKED
-			deck_reference.draw_card(player_hand_reference)
+			# only draw from deck if in DRAWING state
+			if player_hand_reference.state == player_hand_reference.PlayerState.DRAWING:
+				deck_reference.draw_card(player_hand_reference)
+				player_hand_reference.state = player_hand_reference.PlayerState.PLAYING
+			else:
+				print("cannot draw right now")
 		elif result_collision_mask == COLLISION_MASK_CARD_SLOT:
 			# CARD SLOT CLICKED
-			card_slot_reference.draw_top_card(player_hand_reference)
+			# only draw from discard pile if in DRAWING state
+			if player_hand_reference.state == player_hand_reference.PlayerState.DRAWING:
+				card_slot_reference.draw_top_card(player_hand_reference)
+				player_hand_reference.state = player_hand_reference.PlayerState.PLAYING
+			else:
+				print("cannot draw right now")
