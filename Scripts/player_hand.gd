@@ -26,7 +26,7 @@ func _ready() -> void:
 	card_manager_reference = $"../CardManager"
 	player_state_text_reference = $PlayerState
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	player_state_text_reference.text = PlayerState.find_key(state)	
 	
 func add_card_to_hand(card, speed):
@@ -50,6 +50,8 @@ func update_hand_positions(speed):
 		if card == card_manager_reference.card_being_dragged:
 			card.z_index = player_hand.size() + 1
 			continue
+			
+		# z index order
 		card.z_index = i
 		card.hand_position = new_position
 		

@@ -21,22 +21,19 @@ func add_card_to_hand(card, speed = DEFAULT_CARD_MOVE_SPEED):
 		animate_card_to_position(card, card.hand_position, speed, false)
 		
 func update_hand_positions(speed):
-	#for i in range(opponent_hand.size()):
-		## Get new card position based on index
-		#var new_position = Vector2(calculate_card_position(i), HAND_Y_POSITION)
-		#var card = opponent_hand[i]
-		#card.hand_position = new_position
-		#animate_card_to_position(card, new_position, speed)
 	for i in range(opponent_hand.size()):
 		var new_position = Vector2(HAND_X_POSITION, calculate_card_position(i))
 		var card = opponent_hand[i]
-		card.hand_position = new_position
-		animate_card_to_position(card, new_position, speed, false)
+		
+		
+		# z index order
+		card.z_index = -i
 		
 		# Rotate cards to face inward (adjust depending on which side they’re on)
 		card.rotation_degrees = -90  # Right side
 		# or card.rotation_degrees = 90  # Left side
-		
+		card.hand_position = new_position
+		animate_card_to_position(card, new_position, speed, false)
 func calculate_card_position(index):
 	#var total_width = (opponent_hand.size() - 1) * CARD_WIDTH
 	#var x_offset  = HAND_X_POSITION + index * CARD_WIDTH - total_width / 2.0

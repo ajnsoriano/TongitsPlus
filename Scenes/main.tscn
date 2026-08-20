@@ -20,6 +20,7 @@ zoom = Vector2(2, 2)
 
 [node name="CardManager" type="Node2D" parent="." unique_id=2086998410]
 script = ExtResource("1_bo1nx")
+All_Face_Up = true
 
 [node name="DiscardSlot" parent="." unique_id=1717867989 instance=ExtResource("3_8gbba")]
 z_index = -1
@@ -50,7 +51,6 @@ rotation = -1.5707964
 script = ExtResource("4_344ge")
 
 [node name="DeadwoodCounter" type="RichTextLabel" parent="OpponentHand" unique_id=1235694028]
-visible = false
 offset_left = 19.000006
 offset_top = -163.0
 offset_right = 115.00001

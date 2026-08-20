@@ -31,7 +31,7 @@ func _ready() -> void:
 		
 
 func start_game():
-	deadwood_text.visible = false
+	#deadwood_text.visible = false
 	deck_reference.create_deck()
 	for i in range(1, 13):
 		deck_reference.draw_card(opponent_hand)
@@ -87,6 +87,16 @@ func opponent_turn():
 	var runs = meld_result["runs"]
 	var deadwood = meld_result["deadwood"]
 
+	# check if cpu won before discarding 
+	
+	if deadwood.is_empty():
+		print("COMPUTER WON BEFORE DISCARDING")
+		sort_by_meld(sets, runs)
+		tongits()
+		return
+	
+	
+	
 	if !sets.is_empty():
 		print("Sets:")
 		for set_ in sets:
@@ -122,21 +132,13 @@ func opponent_turn():
 		
 		print("Deadwood: ", deadwood_value)
 	
-	
 	if deadwood_value == 0:
-		print("TONGITS!!!")
-		turn_timer.wait_time = 0.5
-		turn_timer.start()
-		await(turn_timer)
-		#get_tree().quit()
-		if !deadwood_text.visible:
-			deadwood_text.visible = true
-		deadwood_text.text = "CPU WINS"
-		reveal_cards(opponent_hand)
+		sort_by_meld(sets, runs)
+		tongits()
 		return
-	else:
-		deadwood_text = opponent_hand.get_node("DeadwoodCounter")
-		deadwood_text.text = str(deadwood_value)
+	
+	deadwood_text = opponent_hand.get_node("DeadwoodCounter")
+	deadwood_text.text = str(deadwood_value)
 		
 	# reset player deck draw
 	
@@ -162,6 +164,17 @@ func discard(card, hand):
 	
 	hand.remove_card_from_hand(card_to_discard)
 	discard_pile.add_card(card_to_discard) 
+	
+func sort_by_meld(sets, runs):
+	var sorted_hand = []
+	for _set in sets:
+		for card in _set:
+			sorted_hand.append(card)
+	for run in runs:
+		for card in run:
+			sorted_hand.append(card)
+	opponent_hand.opponent_hand = sorted_hand
+	opponent_hand.update_hand_positions(0.1)
 	
 func score_card_to_discard(card, hand):
 	var score = 0
@@ -354,6 +367,18 @@ func check_discard_pile(hand, discard_slot):
 		if does_discard_help_run(hand, top, runs, sets):
 			return true
 	return false
+	
+func tongits():
+	print("TONGITS!!!")
+	turn_timer.wait_time = 0.5
+	turn_timer.start()
+	await(turn_timer) 
+	#get_tree().quit()
+	if !deadwood_text.visible:
+		deadwood_text.visible = true
+	deadwood_text.text = "COMPUTER WINS"
+	
+	reveal_cards(opponent_hand)
 	
 func _on_restart_button_pressed() -> void:
 	discard_pile.clear()
